@@ -1,70 +1,85 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Business Card NFT Play2Earn Game
 
-## Available Scripts
+It is a repo ParibuHub-Patika.dev-Solidity-Practicum-Final-Case.
 
-In the project directory, you can run:
 
-### `npm start`
+- @author/developer :[@omercsoylu](https://github.com/omercsoylu)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Firstly, BusinessToken ERC20 and BusinessCard ERC721 Contract must be deploy to any EVM-based blockchain network.
+Then the "contract addresses" should be replaced with the variables in Contracts.js
+The ABIs of each contract should be replaced with ​​in Abi.js
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The BusinessWorld contract is deployed with the addresses of the BusinessToken and BusinessCard contracts.
+In the same way, contract address and ABI of BusinessWorld should be replaced with in Contracts.js and Abi.js.
 
-### `npm test`
+In order for the BusinessWorld contract to access the BusinessToken, 
+the BusinessWorld contract address must be added as the owner with the "addOwner" function of the BusinessToken contract.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+!!"polygon testnet" mumbai is used in this project.
+Please make sure you have polygon mumbai tesnet in your wallet and active network is mumbai when testing.
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Demo
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+https://heartfelt-florentine-6a4329.netlify.app/
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Contracts Repository
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- [BusinessCard ERC721](https://github.com/omercsoylu/ParibuHub-PatikaDev-FinalCase/blob/main/Contracts/BusinessCard.sol)
+- [BusinessToken ERC20](https://github.com/omercsoylu/ParibuHub-PatikaDev-FinalCase/blob/main/Contracts/BusinessToken.sol)
+- [BusinessWorld Contract](https://github.com/omercsoylu/ParibuHub-PatikaDev-FinalCase/blob/main/Contracts/BusinessWorld.sol)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+  
+## Snapshots
 
-## Learn More
+![Uygulama Ekran Görüntüsü](https://cdn.discordapp.com/attachments/1023613609105952812/1062768255229509804/image.png)
+![Uygulama Ekran Görüntüsü](https://cdn.discordapp.com/attachments/1023613609105952812/1062770282332422164/image.png)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  
+## Contents
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- ERC20 Token to be minted by staking business card NFTs
+- in ERC721 standard, Business card NFTs 
+- A demo frontend made with React
 
-### Code Splitting
+  
+## Used technologies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**:** React, ethers.js, Solidity(ERC20 Token, ERC721 NFTs, Staking and Earn Contract)
 
-### Analyzing the Bundle Size
+**:** Alchemy for blockchain nodes.
+## FAQ
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+#### Can you give information about ERC20Token supply and mint?
 
-### Making a Progressive Web App
+The token supply is unlimited and the mint function only be controlled by the Game's contract.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+#### What benefit do nft's features offer?
 
-### Advanced Configuration
+NFTs are each owned by employees with a title. The salary coefficients of these titles are different in the game. in this way, each NFT provides a different income.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+#### What is the game time format?
 
-### Deployment
+-This is not valid for now. There is no time limit
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+ 1 hour in real time means 1 day in game. an employee must work for at least one month, that is, 30 days. which is equivalent to 30 hours in real time. you stake one nft, so if you start the employee you cannot unstake for 30 hours.
+  
+#### How does the contract calculate revenue?
 
-### `npm run build` fails to minify
+This game is a demo so we have defined a title for each id for convenience. For example, ids like 1-11-21 are CEOs. And the title of CEO has a revenue coefficient. Companies also have a revenue multiplier. In which company the NFT is employed, a salary calculation is made from these values ​​and the owner of the NFT can withdraw it in certain periods.
+## References
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- [OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts) ERC20 and ERC721 contracts.
+- [ethers.js](https://docs.ethers.org/v5/)
+- [patika.dev](patika.dev)
+
+  
+## Licences
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+  Anyone can use the contracts used in this project as they wish. However, it should be known that this is prepared for an assignment and no responsibility can be accepted for its safety. You assume your own controls and responsibility if commercial development is to be made.
