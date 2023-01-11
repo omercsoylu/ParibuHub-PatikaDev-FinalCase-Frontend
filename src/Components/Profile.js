@@ -17,7 +17,6 @@ import Contracts from "../Contracts";
 import Abi from "../Abi";
 
 const Profile = (props) => {
-  const apiKey = process.env.REACT_APP_ALCHEMY_API_KEY;
   const [signer, setSigner] = useState();
   const [walletAddress, setWalletAddress] = useState();
   const [provider, setProvider] = useState();
@@ -42,6 +41,8 @@ const Profile = (props) => {
       provider
     );
 
+    let employeesArray = [];
+
     const getEmployees = await wContract.getEmployees(walletAddress);
     if (getEmployees.length > 0) {
       console.log(
@@ -61,15 +62,21 @@ const Profile = (props) => {
         draftData.startAt = Number(employee.startAt);
         draftData.lastClaimedAt = Number(employee.lastClaimedAt);
         draftData.employeeId = Number(employee.employeeId);
-
-        console.log("Employees::: ", draftData);
-        setEmployees((employees) => [...employees, draftData]);
+        employeesArray.push(draftData);
       }
-      console.log("Employees::: ", employees);
       //
     } else {
       console.log("no employee");
     }
+    setEmployees(employeesArray);
+
+    console.log(
+      "employeesArray",
+      employeesArray,
+      "employees",
+      employees,
+      "oldArray"
+    );
   };
   /*  -------------claim income------------ */
   const claimIncome = async (_employeeId) => {
@@ -114,14 +121,14 @@ const Profile = (props) => {
       provider
     );
 
-    console.log("walletAddress", walletAddress);
-
     const ownCount = await wContract.balanceOf(walletAddress);
+    console.log("getUnemployees Triggered...");
     let maxOfOwn = Number(ownCount);
     setMaxOwn(maxOfOwn);
-    console.log("maxOfOwn: ", maxOfOwn);
     let loopCounter = 1;
     let foundCounter = 0;
+
+    let unemployeesArray = []; // empty array
     while (true) {
       if (foundCounter == maxOfOwn) {
         break;
@@ -130,14 +137,13 @@ const Profile = (props) => {
         if (getOwner.toLowerCase() == walletAddress.toLowerCase()) {
           let data = getDraftDataOfNFT(loopCounter);
           data.isApproved = await isApproved(data.id);
-          setUnemployees((unemployees) => [...unemployees, data]);
-          console.log("data: ", data);
+          unemployeesArray.push(data);
           foundCounter++;
         }
       }
       console.log(
         "unemployees.length: ",
-        unemployees.length,
+        unemployeesArray.length,
         "maxOfOwn: ",
         maxOfOwn,
         "foundCounter: ",
@@ -148,6 +154,16 @@ const Profile = (props) => {
 
     // end of things
     unemployeesMaxPage(maxOfOwn);
+
+    setUnemployees(unemployeesArray);
+
+    console.log(
+      "unemployeesArray",
+      unemployeesArray,
+      "unemployees",
+      unemployees
+    );
+
     viewPageUnemployees(activeUnemployeesPage);
   };
   // isapproved
@@ -169,47 +185,46 @@ const Profile = (props) => {
   };
   // employee max page calculate...
   const unemployeesMaxPage = async (_maxOfOwn) => {
-    console.log("max page ....", _maxOfOwn);
     let length = _maxOfOwn;
     if (length <= 3) {
       setMaxUnemployeesPage(1);
-      console.log("max page .... length <= 3");
     } else if (length > 3) {
-      console.log("lenght > 3");
       if (length % 3 == 1) {
         setMaxUnemployeesPage((length + 2) / 3);
-        console.log("setMaxUnemployeesPage", maxUnemployeesPage);
       } else if (length % 3 == 2) {
-        console.log("setMaxUnemployeesPage", maxUnemployeesPage);
         setMaxUnemployeesPage((length + 1) / 3);
       } else if (length % 3 == 0) {
         setMaxUnemployeesPage(length / 3);
-        console.log("setMaxUnemployeesPage", maxUnemployeesPage);
       }
     }
   };
   // viewunemployee in page
   const viewPageUnemployees = async (_activePage) => {
-    console.log("maxOwn::: clicked", maxOwn);
     let length = maxOwn;
-    console.log("length in viewpage: ", maxOwn);
     setViewUnemployees([]);
     let startIndex = (_activePage - 1) * 3;
-    console.log("startIndex", startIndex);
     let lastIndex;
-    console.log("lastIndex", lastIndex);
+
+    console.log(
+      "viewPageUnemployees",
+      "setViewUnemployees([])",
+      viewUnemployees
+    );
 
     if (startIndex + 1 == length) {
       lastIndex = startIndex + 1;
     } else if (startIndex + 2 == length) {
       lastIndex = startIndex + 2;
-    } else if (startIndex + 2 == length) {
+    } else if (startIndex + 3 == length) {
       lastIndex = startIndex + 3;
     } else {
       lastIndex = 3;
     }
 
     console.log(
+      "viewPageUnemployees",
+      "max owns",
+      length,
       "startIndex: ",
       startIndex,
       "lastIndex: ",
@@ -217,18 +232,43 @@ const Profile = (props) => {
       "_activePage",
       _activePage
     );
+
+    let viewArray = [];
+
+    console.log("viewPageUnemployees:", unemployees);
     for (let i = startIndex; i < lastIndex; i++) {
-      setViewUnemployees((view) => [...view, unemployees[i]]);
-      console.log("viewEmployee: ", viewUnemployees);
+      viewArray.push(unemployees[i]);
+      console.log(
+        "_activePage",
+        _activePage,
+        "viewPageUnemployees",
+        "viewArray.push(unemployees[i]):",
+        unemployees[i]
+      );
     }
+
+    setViewUnemployees(viewArray);
+    console.log(
+      "viewPageUnemployees",
+      viewUnemployees,
+      "viewArray",
+      viewArray,
+      "_activePage",
+      _activePage
+    );
   };
+
   useEffect(() => {
-    viewPageUnemployees(activeUnemployeesPage);
+    viewPageUnemployees(1);
   }, [unemployees]);
   // is page changed
   const setUnemployeesPageChange = async (e, { activePage }) => {
     setActiveUnemployeesPage(activePage);
-    console.log("page changed. active page : ", activePage);
+    console.log(
+      "viewPageUnemployees:",
+      "page changed. active page : ",
+      activePage
+    );
     viewPageUnemployees(activePage);
   };
   // employee approve to contract
@@ -290,20 +330,21 @@ const Profile = (props) => {
       provider
     );
 
-    const data = await wContract.getCompanies();
-    if (data.length > 0) {
-      // getcompanies max 10
-      for (let i = 0; i < 10; i++) {
-        if (Number(data[i].baseSalary) == 0) {
-          continue;
+    try {
+      const data = await wContract.getCompanies();
+      if (data.length > 0) {
+        // getcompanies max 10
+        for (let i = 0; i < 10; i++) {
+          if (Number(data[i].baseSalary) == 0) {
+            continue;
+          }
+          setCompanies((companies) => [...companies, data[i]]);
         }
-        setCompanies((companies) => [...companies, data[i]]);
       }
+    } catch (e) {
+      console.log("getCompanies error: ", e);
     }
   };
-  useEffect(() => {
-    getCompanies();
-  }, []);
   //
 
   const showJobModal = (_employeeId, _name, _title) => {
@@ -324,59 +365,92 @@ const Profile = (props) => {
       provider
     );
 
-    wContract.on("HireAJob", (_employeeId, _employeeOwner) => {
-      console.log(
-        "HireAJob",
-        "_employeeId: ",
-        _employeeId,
-        "_employeeOwner: ",
-        _employeeOwner
-      );
+    try {
+      wContract.on("HireAJob", (_employeeId, _employeeOwner) => {
+        console.log(
+          "HireAJob Event",
+          "_employeeId: ",
+          _employeeId,
+          "_employeeOwner: ",
+          _employeeOwner
+        );
 
-      if (_employeeOwner == walletAddress) {
-        getUnemployees();
-        getEmployees();
-      }
-    });
+        if (_employeeOwner == walletAddress) {
+          getUnemployees();
+          getEmployees();
+          setIsModalOpen(false);
+        }
+      });
+    } catch (e) {
+      console.log("HireAJob Event error:", e);
+    }
 
-    wContract.on("FireFromJob", (_employeeId, _employeeOwner) => {
-      console.log(
-        "FireFromJob",
-        "_employeeId: ",
-        _employeeId,
-        "_employeeOwner: ",
-        _employeeOwner
-      );
+    try {
+      wContract.on("FireFromJob", (_employeeId, _employeeOwner) => {
+        console.log(
+          "FireFromJob Event",
+          "_employeeId: ",
+          _employeeId,
+          "_employeeOwner: ",
+          _employeeOwner
+        );
 
-      if (_employeeOwner == walletAddress) {
-        getUnemployees();
-        getEmployees();
-      }
-    });
+        if (_employeeOwner == walletAddress) {
+          getUnemployees();
+          getEmployees();
+        }
+      });
+    } catch (e) {
+      console.log("FireFromJob Event error:", e);
+    }
 
     const cContract = new ethers.Contract(
       Contracts.BUSINESS_CARD,
       Abi.BUSINESS_CARD,
       provider
     );
-    cContract.on("Approval", (_owner, _spender, _value) => {
-      console.log(
-        "Approval",
-        "_owner: ",
-        _owner,
-        "_spender: ",
-        _spender,
-        "_value",
-        _value
-      );
-      if (_owner == walletAddress) {
-        getUnemployees();
-      }
-    });
+    try {
+      cContract.on("Approval", (_owner, _spender, _value) => {
+        console.log(
+          "Approval Event",
+          "_owner: ",
+          _owner,
+          "_spender: ",
+          _spender,
+          "_value",
+          _value
+        );
+        if (_owner == walletAddress) {
+          getUnemployees();
+        }
+      });
+    } catch (e) {
+      console.log("Approval Event error:", e);
+    }
+    try {
+      cContract.on("Transfer", (_from, _to, _value) => {
+        console.log(
+          "Transfer Event",
+          "_from: ",
+          _from,
+          "_to: ",
+          _to,
+          "_value",
+          _value
+        );
+        if (_to == walletAddress && _from != Contracts.BUSINESS_WORLD) {
+          // Mint or transfer to owner
+          getUnemployees();
+        }
+      });
+    } catch (e) {
+      console.log("Transfer Event error:", e);
+    }
   };
   /*------------------------------------------------------*/
 
   const getDraftDataOfNFT = (_id) => {
+    _id = Number(_id);
     if (_id % 10 == 1) {
       return {
         id: _id,
@@ -418,7 +492,9 @@ const Profile = (props) => {
   useEffect(() => {
     if (props.wallet != "") {
       initializeF();
+      console.log("there is a wallet.");
     } else {
+      console.log("there is no wallet.");
       setWalletAddress("");
       setUnemployees([]);
       setEmployees([]);
@@ -429,17 +505,22 @@ const Profile = (props) => {
 
   useEffect(() => {
     listenContract();
+    console.log("provider changed. listening contract...");
   }, [provider]);
 
   useEffect(() => {
+    console.log("walletaddress changed.");
     if (walletAddress != "") {
+      console.log("there is a wallet");
       getUnemployees();
       getEmployees();
       getCompanies();
     } else {
+      console.log("there is no wallet.");
       setUnemployees([]);
       setEmployees([]);
       setViewUnemployees([]);
+      setActiveUnemployeesPage(1);
     }
   }, [walletAddress]);
 
@@ -452,11 +533,15 @@ const Profile = (props) => {
       <Message>
         <Message.Header>Your Unemployers</Message.Header>
       </Message>
-      {employees.length == 0 ? (
+      {unemployees.length == 0 || viewUnemployees.length == 0 ? (
         <>
           <Segment raised>
             <Placeholder>
+              {console.log(viewUnemployees.length)}
               <Placeholder.Header image>
+                {console.log(
+                  "unemployees.length == 0 && viewUnemployees.length == 0"
+                )}
                 <Placeholder.Line />
                 <Placeholder.Line />
               </Placeholder.Header>
@@ -483,6 +568,13 @@ const Profile = (props) => {
         viewUnemployees.map((nft, index) => (
           <Card.Group centered key={index}>
             <Card>
+              {console.log(
+                " viewUnemployees.map((nft, index)",
+                "unemployees.length",
+                unemployees.length,
+                "viewUnemployees.length",
+                viewUnemployees.length
+              )}
               <Card.Content>
                 <Image
                   floated="right"
@@ -529,7 +621,7 @@ const Profile = (props) => {
           </Card.Group>
         ))
       )}
-      {employees.length > 0 ? (
+      {unemployees.length > 3 ? (
         <Container textAlign="center" style={{ marginTop: "1rem" }}>
           <Pagination
             activePage={activeUnemployeesPage}
@@ -640,6 +732,7 @@ const Profile = (props) => {
               {companies.length > 0
                 ? companies.map((company, _index) => (
                     <Table.Row key={_index}>
+                      {console.log("companies length: ", companies.length)}
                       <Table.Cell>{Number(company?.companyIndex)}</Table.Cell>
                       <Table.Cell>{company?.name}</Table.Cell>
                       <Table.Cell>{Number(company?.baseSalary)}</Table.Cell>

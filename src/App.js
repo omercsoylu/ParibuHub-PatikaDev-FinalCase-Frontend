@@ -29,15 +29,30 @@ function App() {
   // Connecting Wallet
   const [walletAddress, setWalletAddress] = useState();
   const [balanceOfBST, setBalanceOfBST] = useState();
+  const [provider, setProvider] = useState();
 
   const connectWallet = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
+
+    try {
+      const { ethereum } = window;
+      ethereum.on("accountsChanged", (accounts) => {
+        console.log("Account changed to:", accounts[0]);
+        setWalletAddress(accounts[0]);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
     const signer = provider.getSigner();
     const address = await signer.getAddress();
     setWalletAddress(address);
+    setProvider(provider);
     console.log("Connecting wallet:", address);
+  };
 
+  const listeningEvent = async () => {
     const tContract = new ethers.Contract(
       Contracts.BUSINESS_TOKEN,
       Abi.BUSINESS_TOKEN,
@@ -55,12 +70,12 @@ function App() {
           "_value",
           _value
         );
-        const balance = await tContract.balanceOf(address);
+        const balance = await tContract.balanceOf(walletAddress);
         setBalanceOfBST(ethers.utils.formatEther(balance).slice(0, -2));
       }
     });
 
-    const balance = await tContract.balanceOf(address);
+    const balance = await tContract.balanceOf(walletAddress);
     console.log(
       "BST Balance: ",
       balance,
@@ -69,6 +84,10 @@ function App() {
     );
     setBalanceOfBST(ethers.utils.formatEther(balance).slice(0, -2));
   };
+
+  useEffect(() => {
+    listeningEvent();
+  }, [walletAddress]);
 
   const disconnectWallet = () => {
     setWalletAddress("");
@@ -91,6 +110,10 @@ function App() {
             <p>
               You can earn BusinessToken (BST) by mint BusinessCard nft and
               putting to work in companies.
+            </p>
+            <p>
+            Please ensure your wallet is in "polygon mumbai tesnet" network. This is an educational project. There is no security guarantee therefore please use your test wallet. 
+             <strong>author/dev: @github/omercsoylu</strong>
             </p>
           </Message>
         </Grid.Column>
