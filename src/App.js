@@ -8,6 +8,23 @@ import Profile from "./Components/Profile";
 import Companies from "./Components/Companies";
 import MintableArea from "./Components/MintableArea";
 
+/*
+@Author/Dev : Ömer Can Soylu
+@contact: github.com/omercsoylu
+
+Firstly, BusinessToken ERC20 and BusinessCard ERC721 Contract must be deploy to any EVM-based blockchain network.
+Then the "contract addresses" should be replaced with the variables in Contracts.js
+The ABIs of each contract should be replaced with ​​in Abi.js
+
+The BusinessWorld contract is deployed with the addresses of the BusinessToken and BusinessCard contracts.
+In the same way, contract address and ABI of BusinessWorld should be replaced with in Contracts.js and Abi.js.
+
+In order for the BusinessWorld contract to access the BusinessToken, 
+the BusinessWorld contract address must be added as the owner with the "addOwner" function of the BusinessToken contract.
+
+!!"polygon testnet" mumbai is used in this project.
+Please make sure you have polygon mumbai tesnet in your wallet and active network is mumbai when testing.
+*/
 function App() {
   // Connecting Wallet
   const [walletAddress, setWalletAddress] = useState();
@@ -29,7 +46,15 @@ function App() {
 
     tContract.on("Transfer", async (_from, _to, _value) => {
       if (_from == walletAddress || _to == walletAddress) {
-        console.log("BST Transfer listening...", "_from: ", _from, "_to: ", _to, "_value", _value);
+        console.log(
+          "BST Transfer listening...",
+          "_from: ",
+          _from,
+          "_to: ",
+          _to,
+          "_value",
+          _value
+        );
         const balance = await tContract.balanceOf(address);
         setBalanceOfBST(ethers.utils.formatEther(balance).slice(0, -2));
       }
