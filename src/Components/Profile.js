@@ -488,23 +488,9 @@ const Profile = (props) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (props.wallet != "") {
-  //     initializeF();
-  //     console.log("there is a wallet.");
-  //   } else {
-  //     console.log("there is no wallet.");
-  //     setWalletAddress("");
-  //     setUnemployees([]);
-  //     setEmployees([]);
-  //     setViewUnemployees([]);
-  //     setCompanies([]);
-  //   }
-  // }, [props.wallet]);
-
   // initialize.
   useEffect(() => {
-    if (props.provider != null) {
+    if (props.provider != "") {
       console.log("props.provider in Profile: ", props.provider);
       initializeF(props.provider);
     } else {
