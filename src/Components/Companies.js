@@ -9,24 +9,25 @@ import CompanyThree from "../Assets/company_3.png";
 import CompanyFour from "../Assets/company_4.png";
 
 const Companies = (props) => {
+  // Signer and provider => getWalletAddress
   const [signer, setSigner] = useState();
   const [walletAddress, setWalletAddress] = useState();
   const [provider, setProvider] = useState();
 
-  const initializeF = async () => {
-    const _provider = new ethers.providers.Web3Provider(window.ethereum);
-    await _provider.send("eth_requestAccounts", []);
+  // if provider coming from props, initialize.
+  const initializeF = async (_provider) => {
     const _sig = _provider.getSigner();
-    const _resAdd = await _sig.getAddress();
+    const _wallet = await _sig.getAddress();
     setSigner(_sig);
-    setWalletAddress(_resAdd);
+    setWalletAddress(_wallet);
     setProvider(_provider);
   };
 
+  // companies Object.
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
+    // companies array clear.
     setCompanies([]);
-    await initializeF();
     const wContract = new ethers.Contract(
       Contracts.BUSINESS_WORLD,
       Abi.BUSINESS_WORLD,
@@ -44,22 +45,28 @@ const Companies = (props) => {
     }
   };
 
+  // if provider is not null, get companies from contract.
   useEffect(() => {
-    if (walletAddress != "") {
+    if (provider) {
       getCompanies();
     } else {
       setCompanies([]);
     }
-  }, [walletAddress]);
+  }, [provider]);
 
+  // initialize.
   useEffect(() => {
-    if (props.wallet != "") {
-      initializeF();
+    if (props.provider != null) {
+      console.log("props.provider in Companies: ", props.provider);
+      initializeF(props.provider);
     } else {
+      setSigner("");
       setWalletAddress("");
+      setProvider("");
     }
-  }, [props.wallet]);
+  }, [props.provider]);
 
+  // Random image function.
   const randomCompanyImage = (_index) => {
     switch (_index % 4) {
       case 0:
@@ -79,7 +86,7 @@ const Companies = (props) => {
     <Card.Group centered>
       {companies.length > 0 ? (
         companies.map((company, index) => (
-          <Card key={company}>
+          <Card key={index}>
             <Image src={randomCompanyImage(index)} wrapped ui={false} />
             <Card.Content>
               <Card.Header>{company.name}</Card.Header>
