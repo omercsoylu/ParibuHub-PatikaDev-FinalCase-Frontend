@@ -17,18 +17,18 @@ import Contracts from "../Contracts";
 import Abi from "../Abi";
 
 const Profile = (props) => {
+  // Signer and provider => getWalletAddress
   const [signer, setSigner] = useState();
   const [walletAddress, setWalletAddress] = useState();
   const [provider, setProvider] = useState();
 
-  const initializeF = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const sig = provider.getSigner();
-    const resAdd = await sig.getAddress();
-    setSigner(sig);
-    setProvider(provider);
-    setWalletAddress(resAdd);
+  // if provider coming from props, initialize.
+  const initializeF = async (_provider) => {
+    const _sig = _provider.getSigner();
+    const _wallet = await _sig.getAddress();
+    setSigner(_sig);
+    setWalletAddress(_wallet);
+    setProvider(_provider);
   };
 
   /*  -------------Employed------------ */
@@ -323,7 +323,6 @@ const Profile = (props) => {
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
     setCompanies([]);
-    await initializeF();
     const wContract = new ethers.Contract(
       Contracts.BUSINESS_WORLD,
       Abi.BUSINESS_WORLD,
@@ -489,27 +488,39 @@ const Profile = (props) => {
     }
   };
 
-  useEffect(() => {
-    if (props.wallet != "") {
-      initializeF();
-      console.log("there is a wallet.");
-    } else {
-      console.log("there is no wallet.");
-      setWalletAddress("");
-      setUnemployees([]);
-      setEmployees([]);
-      setViewUnemployees([]);
-      setCompanies([]);
-    }
-  }, [props.wallet]);
+  // useEffect(() => {
+  //   if (props.wallet != "") {
+  //     initializeF();
+  //     console.log("there is a wallet.");
+  //   } else {
+  //     console.log("there is no wallet.");
+  //     setWalletAddress("");
+  //     setUnemployees([]);
+  //     setEmployees([]);
+  //     setViewUnemployees([]);
+  //     setCompanies([]);
+  //   }
+  // }, [props.wallet]);
 
+  // initialize.
   useEffect(() => {
-    listenContract();
-    console.log("provider changed. listening contract...");
-  }, [provider]);
+    if (props.provider != null) {
+      console.log("props.provider in Profile: ", props.provider);
+      initializeF(props.provider);
+    } else {
+      setSigner("");
+      setWalletAddress("");
+      setProvider("");
+    }
+  }, [props.provider]);
 
   useEffect(() => {
     console.log("walletaddress changed.");
+    if (provider != "") {
+      console.log("provider useeffect: ", provider);
+      listenContract();
+    }
+
     if (walletAddress != "") {
       console.log("there is a wallet");
       getUnemployees();
