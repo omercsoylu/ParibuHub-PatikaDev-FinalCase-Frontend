@@ -6,40 +6,47 @@ import Abi from "../Abi";
 import BusinessCards from "../Assets/businesscards.png";
 
 const MintableArea = (props) => {
+  // Signer and provider => getWalletAddress
   const [signer, setSigner] = useState();
   const [walletAddress, setWalletAddress] = useState();
   const [provider, setProvider] = useState();
 
-  const initializeF = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const sig = provider.getSigner();
-    const resAdd = await sig.getAddress();
-    setSigner(sig);
-    setWalletAddress(resAdd);
-    setProvider(provider);
+  // if provider coming from props, initialize.
+  const initializeF = async (_provider) => {
+    const _sig = _provider.getSigner();
+    const _wallet = await _sig.getAddress();
+    setSigner(_sig);
+    setWalletAddress(_wallet);
+    setProvider(_provider);
   };
 
+  // NFT mint function.
   const claimCardNFT = async () => {
-    await initializeF();
-    const businessCardNFT = new ethers.Contract(
-      Contracts.BUSINESS_CARD,
-      Abi.BUSINESS_CARD,
-      provider
-    );
-
-    const nftContracts = businessCardNFT.connect(signer);
-    const tx = await nftContracts.mintBusinessCard();
-    console.log("tx: ", tx);
+    if (provider) {
+      const businessCardNFT = new ethers.Contract(
+        Contracts.BUSINESS_CARD,
+        Abi.BUSINESS_CARD,
+        provider
+      );
+      const nftContracts = businessCardNFT.connect(signer);
+      const tx = await nftContracts.mintBusinessCard();
+      console.log("tx: ", tx);
+    } else {
+      console.log("Error: ", "provider not found.");
+    }
   };
 
+  // initialize useEffect
   useEffect(() => {
-    if (props.wallet != "") {
-      initializeF();
+    if (props.provider != null) {
+      console.log("props.provider in MintableArea: ", props.provider);
+      initializeF(props.provider);
     } else {
+      setSigner("");
       setWalletAddress("");
+      setProvider("");
     }
-  }, [props.wallet]);
+  }, [props.provider]);
 
   return (
     <Container>
