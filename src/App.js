@@ -32,70 +32,102 @@ function App() {
   const [provider, setProvider] = useState();
 
   const connectWallet = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
+    const connectProvider = new ethers.providers.Web3Provider(window.ethereum);
+    await connectProvider.send("eth_requestAccounts", []);
 
     try {
       const { ethereum } = window;
       ethereum.on("accountsChanged", (accounts) => {
-        console.log("Account changed to:", accounts[0]);
+        console.log("Account changed to:", accounts[0], "Accounts: ", accounts);
+        console.log(
+          "New provider to:",
+          new ethers.providers.Web3Provider(ethereum)
+        );
+        setProvider(new ethers.providers.Web3Provider(ethereum));
+        console.log("connectProvider: ", connectProvider);
         setWalletAddress(accounts[0]);
+        console.log("provider: ", provider, "walletAddress: ", walletAddress);
       });
     } catch (error) {
       console.log(error);
     }
 
-    const signer = provider.getSigner();
+    const signer = connectProvider.getSigner();
     const address = await signer.getAddress();
     setWalletAddress(address);
-    setProvider(provider);
+    setProvider(connectProvider);
     console.log("Connecting wallet:", address);
   };
 
-  const listeningEvent = async () => {
+  const getAndListeningEvent = async () => {
     const tContract = new ethers.Contract(
       Contracts.BUSINESS_TOKEN,
       Abi.BUSINESS_TOKEN,
       provider
     );
 
-    tContract.on("Transfer", async (_from, _to, _value) => {
-      if (_from == walletAddress || _to == walletAddress) {
-        console.log(
-          "BST Transfer listening...",
-          "_from: ",
-          _from,
-          "_to: ",
-          _to,
-          "_value",
-          _value
-        );
-        const balance = await tContract.balanceOf(walletAddress);
-        setBalanceOfBST(ethers.utils.formatEther(balance).slice(0, -2));
-      }
-    });
+    console.log(
+      "BST Transfer listening...",
+      "provider:",
+      provider,
+      "wallet:",
+      walletAddress
+    );
+
+    try {
+      tContract.on("Transfer", async (_from, _to, _value) => {
+        if (_from == walletAddress || _to == walletAddress) {
+          console.log(
+            "BST Transfer listening...",
+            "_from: ",
+            _from,
+            "_to: ",
+            _to,
+            "_value",
+            _value
+          );
+          const balance = await tContract.balanceOf(walletAddress);
+          setBalanceOfBST(
+            Number(ethers.utils.formatEther(balance)).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+            })
+          );
+        }
+      });
+    } catch (e) {
+      console.log("BST listening error: ", e);
+    }
 
     const balance = await tContract.balanceOf(walletAddress);
     console.log(
       "BST Balance: ",
       balance,
       "BST Balance: ",
-      ethers.utils.formatEther(balance)
+      Number(ethers.utils.formatEther(balance)).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+      })
     );
-    setBalanceOfBST(ethers.utils.formatEther(balance).slice(0, -2));
+    setBalanceOfBST(
+      Number(ethers.utils.formatEther(balance)).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+      })
+    );
   };
 
   useEffect(() => {
-    listeningEvent();
-  }, [walletAddress]);
+    if (provider) {
+      getAndListeningEvent();
+    }
+  }, [provider]);
 
   const disconnectWallet = () => {
     setWalletAddress("");
-    console.log("Disconnecting", "walletAddress:", walletAddress);
+    setProvider("");
+    console.log("Disconnecting...", "walletAddress:", walletAddress);
   };
 
   useEffect(() => {
-    connectWallet();
+    //connectWallet();
   }, []);
 
   return (
@@ -112,8 +144,10 @@ function App() {
               putting to work in companies.
             </p>
             <p>
-            Please ensure your wallet is in "polygon mumbai tesnet" network. This is an educational project. There is no security guarantee therefore please use your test wallet. 
-             <strong>author/dev: @github/omercsoylu</strong>
+              Please ensure your wallet is in "polygon mumbai tesnet" network.
+              This is an educational project. There is no security guarantee
+              therefore please use your test wallet.
+              <strong>author/dev: @github/omercsoylu</strong>
             </p>
           </Message>
         </Grid.Column>
@@ -147,19 +181,19 @@ function App() {
       LEFT-PROFILE
       */}
         <Grid.Column width={3}>
-          <Profile wallet={walletAddress} />
+          <Profile provider={provider} />
         </Grid.Column>
         {/*
       COMPANIES
       */}
         <Grid.Column width={10}>
-          <Companies wallet={walletAddress} />
+          <Companies provider={provider} />
         </Grid.Column>
         {/*
       RIGHT-MINT-SECTION
       */}
         <Grid.Column width={3}>
-          <MintableArea wallet={walletAddress} />
+          <MintableArea provider={provider} />
         </Grid.Column>
       </Grid.Row>
       {/*
